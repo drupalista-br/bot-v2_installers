@@ -68,7 +68,7 @@ if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
 } else {
     Write-Host "`n✅ Scoop j${lc_a_acute} est${lc_a_acute} instalado."
 }
-$folderpath_app = (scoop prefix bot)
+$folderpath_app = scoop prefix "b${lc_o_acute}t"
 
 # ------------------------------
 # 🦁 Instala o Brave
@@ -94,7 +94,8 @@ if (-not (Get-Command soffice.exe -ErrorAction SilentlyContinue)) {
 # 📥 Instala o Bót
 # ------------------------------
 Write-Host "`n📦 Instalando o b${lc_o_acute}t..."
-scoop install https://xn--bt-5ja.srv.br/instalar.json
+scoop install "https://raw.githubusercontent.com/drupalista-br/bot-v2_installers/refs/heads/scoop/b$($lc_o_acute)t.json"
+
 
 # ------------------------------
 # 🧷 Atalho direto para o script PHP
