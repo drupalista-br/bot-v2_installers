@@ -4,7 +4,7 @@
 
   Comando original:
   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-  Invoke-RestMethod -Uri https://xn--bt-5ja.srv.br/win-instalar | Invoke-Expression
+  Invoke-RestMethod -Uri https://instalador.xn--bt-5ja.srv.br/win | Invoke-Expression
 
   Liberar política de grupo:
   Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process -Force
@@ -76,6 +76,16 @@ if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
 # ------------------------------
 if (!(scoop bucket list | Select-String -Quiet 'extras')) {
     scoop bucket add extras
+}
+
+# ------------------------------
+# Instalando o Curl
+# ------------------------------
+if (-not (Get-Command curl.exe -ErrorAction SilentlyContinue)) {
+    Write-Host "`n🦁 Instalando o Curl."
+    scoop install curl
+} else {
+    Write-Host "`n✅ Curl j${lc_a_acute} est${lc_a_acute} instalado."
 }
 
 # ------------------------------
