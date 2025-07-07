@@ -14,12 +14,14 @@
 # ------------------------------
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $lc_a_acute = [char]0x00E1    # á
-$lc_c_cedilla = [char]0x00E7  # ç
+$lc_a_tilde = [char]0x00E3    # ã
 $lc_e_acute = [char]0x00E9    # é
+$uc_e_acute = [char]0x00C9    # É
 $lc_i_acute = [char]0x00ED    # í
 $lc_o_acute = [char]0x00F3    # ó
-$lc_a_tilde = [char]0x00E3    # ã
-$uc_e_acute = [char]0x00C9    # É
+$lc_o_tilde = [char]0x00F5    # õ
+$lc_c_cedilla = [char]0x00E7  # ç
+
 
 Write-Host ""
 Write-Host "🚀 Este assistente ir${lc_a_acute}:"
@@ -60,7 +62,7 @@ if ($proseguir -notin @("S", "s")) {
 }
 
 # ------------------------------
-# 📦 Instala o Scoop (se necessário)
+# 📦 Instalando o Scoop (se necessário)
 # ------------------------------
 if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
     Write-Host "`n⬇️  Instalando o Scoop..."
@@ -68,10 +70,16 @@ if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
 } else {
     Write-Host "`n✅ Scoop j${lc_a_acute} est${lc_a_acute} instalado."
 }
-$folderpath_app = scoop prefix "b${lc_o_acute}t"
 
 # ------------------------------
-# 🦁 Instala o Brave
+# 📦 Adicionando o bucket extras
+# ------------------------------
+if (!(scoop bucket list | Select-String -Quiet 'extras')) {
+    scoop bucket add extras
+}
+
+# ------------------------------
+# 🦁 Instalando o Brave
 # ------------------------------
 if (-not (Get-Command brave.exe -ErrorAction SilentlyContinue)) {
     Write-Host "`n🦁 Instalando Brave. Usado como GUI do B${lc_o_acute}t."
@@ -81,37 +89,106 @@ if (-not (Get-Command brave.exe -ErrorAction SilentlyContinue)) {
 }
 
 # ------------------------------
-# 📝 Instala o LibreOffice
+# 📝 Instalando o LibreOffice
 # ------------------------------
+<#
 if (-not (Get-Command soffice.exe -ErrorAction SilentlyContinue)) {
     Write-Host "`n📝 Instalando Libreoffice. Usado para converter planilhas em Tsv."
     scoop install extras/libreoffice
 } else {
     Write-Host "`n✅ LibreOffice j${lc_a_acute} est${lc_a_acute} instalado."
 }
+#>
 
 # ------------------------------
-# 📥 Instala o Bót
+# 📥 Instalando o Bót
 # ------------------------------
 Write-Host "`n📦 Instalando o b${lc_o_acute}t..."
-scoop install "https://raw.githubusercontent.com/drupalista-br/bot-v2_installers/refs/heads/scoop/b$($lc_o_acute)t.json"
-
+scoop install "https://raw.githubusercontent.com/drupalista-br/bot-v2_installers/refs/heads/scoop/b${lc_o_acute}t.json"
 
 # ------------------------------
-# 🧷 Atalho direto para o script PHP
+# 🧷 Setando as variáveis, as funções e as validações
 # ------------------------------
-$shortcutName    = "B${lc_o_acute}t.lnk"
-$desktopPath     = [Environment]::GetFolderPath("Desktop")
-$shortcutPath    = Join-Path $desktopPath $shortcutName
-$phpScript       = Join-Path $folderpath_app "b${lc_o_acute}t-dashboard.php"
+$folderpath_php = scoop prefix php
+$folderpath_app = scoop prefix "b${lc_o_acute}t"
+$filepath_php_exe = Join-Path $folderpath_php 'php.exe'
+$folderpath_bin  = Join-Path $folderpath_app  'bin'
+$folderpath_scoop = if ($Env:SCOOP) { $Env:SCOOP } else { Join-Path $Env:USERPROFILE 'scoop' }
+$folderpath_shims  = Join-Path $folderpath_scoop 'shims'
+$filepath_shortcuts = Join-Path $folderpath_app 'atalhos.json'
+foreach($dir_file in @($folderpath_bin, $filepath_shortcuts, $folderpath_shims)) {
+    if (-not (Test-Path $dir_file)) {
+        throw "Item NÃO encontrado: ${dir_file}"
+    }
+}
 
-$wshShell = New-Object -ComObject WScript.Shell
-$shortcut = $wshShell.CreateShortcut($shortcutPath)
-$shortcut.TargetPath = "php"
-$shortcut.Arguments  = "`"$phpScript`""
-$shortcut.WorkingDirectory = $folderpath_app
-$shortcut.IconLocation     = Join-Path $folderpath_app "logo.ico"
-$shortcut.WindowStyle      = 7  # Oculto
-$shortcut.Save()
+function mkShim {
+    param (
+        [string]$filepath_phar,
+        [string]$filename_exe
+    )
+    $shim_cmd = "`"${filepath_php_exe}`" -f `"${filepath_phar}`""
+    scoop shim add $filename_exe $shim_cmd -f
+}
 
-Write-Host "`n🎉 Pronto! O B${lc_o_acute}t foi instalado. O ${lc_i_acute}cone do programa est${lc_a_acute} na sua ${lc_a_acute}rea de trabalho."
+function mkShortcut {
+    param (
+        [string]$filepath_exe,
+        [string]$filename_exe,
+        [ValidateSet('Desktop', 'Programs')]
+        [string]$location,
+        [string]$description = $null
+    )
+    $folderpath_lnk = [Environment]::GetFolderPath($location)
+    $filepath_lnk = Join-Path $folderpath_lnk ("${filename_exe}.lnk")
+
+    $wshShell = New-Object -ComObject WScript.Shell
+    $shortcut = $wshShell.CreateShortcut($filepath_lnk)
+    $shortcut.TargetPath = $filepath_exe
+    $shortcut.WorkingDirectory = Split-Path $filepath_exe
+    if ($description) {
+        $shortcut.Description = $description
+    }
+    $shortcut.Save()
+}
+
+# ------------------------------
+# 🧷 Criando os .EXEs
+# ------------------------------
+Get-ChildItem -Path $folderpath_bin -File | ForEach-Object {
+    $filename_exe = [System.IO.Path]::GetFileName($_.FullName)
+    $params = @{
+        filepath_phar = $_.FullName
+        filename_exe = $filename_exe
+    }
+    mkShim @params
+}
+
+# ------------------------------
+# 🧷 Criando os atalhos na área de trabalho
+# ------------------------------
+$atalhos = Get-Content $filepath_shortcuts -Raw | ConvertFrom-Json
+foreach ($atalho in $atalhos) {
+    $filepath_exe = Join-Path $folderpath_shims "${atalho}.exe"
+    $params = @{
+        filepath_exe = $filepath_exe
+        filename_exe = $atalho
+        location = 'Desktop'
+    }
+    mkShortcut @params
+}
+
+# ------------------------------
+# 🧷 Criando o atalho no menu Startup
+# ------------------------------
+$filename_exe = "b${lc_o_acute}-dashboard.exe"
+$filepath_exe = Join-Path $folderpath_shims $filename_exe
+$params = @{
+    filepath_exe = $filepath_exe
+    filename_exe = $filename_exe
+    location = 'Programs'
+    description = "B${lc_o_acute}t | Obriga${lc_c_cedilla}${lc_o_tilde}es Fiscais Eireli"
+}
+mkShortcut @params
+
+Write-Host "`n🎉 Pronto! O B${lc_o_acute}t foi instalado."
