@@ -27,7 +27,7 @@ Write-Host ""
 Write-Host "🚀 Este assistente ir${lc_a_acute}:"
 Write-Host "  • Verificar se sua pol${lc_i_acute}tica de execu${lc_c_cedilla}${lc_a_tilde}o ${lc_e_acute} restritiva (Pol${lc_i_acute}tica de Grupo)"
 Write-Host "  • Instalar o gerenciador de pacotes Scoop (caso necess${lc_a_acute}rio) | https://scoop.sh"
-Write-Host "  • Instalar o programa B${lc_o_acute}t | https://b${lc_o_acute}t.srv.br/win-instalar"
+Write-Host "  • Instalar o programa B${lc_o_acute}t | https://instalador.b${lc_o_acute}t.srv.br/win"
 Write-Host ""
 
 # ------------------------------
@@ -147,7 +147,8 @@ function mkShortcut {
         [string]$filename_exe,
         [ValidateSet('Desktop', 'Programs')]
         [string]$location,
-        [string]$description = $null
+        [string]$description = $null,
+        [string]$filepath_icon = $null
     )
     $folderpath_lnk = [Environment]::GetFolderPath($location)
     $filepath_lnk = Join-Path $folderpath_lnk ("${filename_exe}.lnk")
@@ -158,6 +159,9 @@ function mkShortcut {
     $shortcut.WorkingDirectory = Split-Path $filepath_exe
     if ($description) {
         $shortcut.Description = $description
+    }
+    if ($filepath_icon) {
+        $shortcut.IconLocation = $filepath_icon
     }
     $shortcut.Save()
 }
