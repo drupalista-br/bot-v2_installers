@@ -1,9 +1,11 @@
 <?php
+use Bót\Utils\Cli;
 use Bót\Utils\Zip;
 use Bót\Utils\Fs;
 use Bót\Utils\f;
 $_GET['slash'] = DIRECTORY_SEPARATOR;
 require __DIR__ . "{$_GET['slash']}vendor{$_GET['slash']}autoload.php";
+Cli::warningsAreExceptions();
 list(,$version) = $argv;
 
 /**
@@ -28,7 +30,7 @@ $mk_bót_json = function() use ($version) {
     $filepath_zip = (function() use ($filename) : string {
         $folderpath = __DIR__;
         $folderpath_zip = "{$folderpath}{$_GET['slash']}zip";
-        $filepath_zip = "{$folderpath}{$filename}.zip";
+        $filepath_zip = "{$folderpath}{$_GET['slash']}{$filename}.zip";
         Zip::folder($folderpath_zip, $filepath_zip);
         return $filepath_zip;
     })();
@@ -42,9 +44,7 @@ $mk_bót_json = function() use ($version) {
         'hash' => hash_file('sha256', $filepath_zip),
         'depends' => [
             'extras/vcredist2022',
-            'git',
             'php-nts',
-            'python',
             'openssl',
             'zip',
             'unzip',
