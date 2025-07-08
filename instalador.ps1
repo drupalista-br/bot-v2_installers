@@ -46,7 +46,7 @@ if ($gpPolicy.ExecutionPolicy) {
     Write-Host ""
     Write-Host "   • Em seguida execute novamente:"
     Write-Host ""
-    Write-Host "     Invoke-RestMethod -Uri https://xn--bt-5ja.srv.br/win-instalar | Invoke-Expression"
+    Write-Host "     Invoke-RestMethod -Uri https://instalador.xn--bt-5ja.srv.br/win | Invoke-Expression"
     Write-Host ""
     Write-Host ""
     exit
@@ -116,6 +116,7 @@ if (-not (Get-Command soffice.exe -ErrorAction SilentlyContinue)) {
 Write-Host "`n📦 Instalando o b${lc_o_acute}t..."
 scoop install "https://raw.githubusercontent.com/drupalista-br/bot-v2_installers/refs/heads/scoop/b${lc_o_acute}t.json"
 
+
 # ------------------------------
 # 🧷 Setando as variáveis, as funções e as validações
 # ------------------------------
@@ -141,6 +142,7 @@ function mkShim {
     scoop shim add $filename_exe $shim_cmd -f
 }
 
+# TODO move it to a sepate .ps1 file | https://copilot.microsoft.com/chats/5uz46ZBXo8XWLD6SBS7WY
 function mkShortcut {
     param (
         [string]$filepath_exe,
@@ -165,6 +167,11 @@ function mkShortcut {
     }
     $shortcut.Save()
 }
+
+# ------------------------------
+# 📥 Instalando o CA do Bót
+# ------------------------------
+# TODO https://copilot.microsoft.com/chats/B5m2XWxE4xAfkYenANtui
 
 # ------------------------------
 # 🧷 Criando os .EXEs
