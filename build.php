@@ -8,6 +8,10 @@ require __DIR__ . "{$_GET['slash']}vendor{$_GET['slash']}autoload.php";
 Cli::warningsAreExceptions();
 list(,$version) = $argv;
 
+$delete_zip = function() {
+    foreach(glob(__DIR__ . "{$_GET['slash']}*.zip") as $filepath_zip)
+        unlink($filepath_zip);
+};
 /**
  * From: ../../bins/bin/*
  * To: zip/bin/*
@@ -61,5 +65,6 @@ $mk_bót_json = function() use ($version) {
     ];
     f::array2json($filepath_json, $json);
 };
+$delete_zip();
 $copy_phars();
 $mk_bót_json();
