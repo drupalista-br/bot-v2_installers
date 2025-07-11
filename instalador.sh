@@ -9,10 +9,10 @@ php_min_ver="8.3"
 pnpm_min_ver=10
 node_min_ver=20
 duckdb_min_ver=1.2
+GIT_REPO_DIR="$HOME/.bót-install"
 
 isLinux() {
-    OS=$(uname -s)
-    if [ "$OS" = "Linux" ]; then
+    if [ "$(uname -s)" = "Linux" ]; then
         return 0
     fi
     return 1
@@ -37,10 +37,9 @@ installPhp() {
 }
 installPnpm() {
     outdated() {
-        if [ "$(pnpm -v | cut -d. -f1)" -le $pnpm_min_ver ]; then
-            return 0
-        fi
-        return 1
+        current=$(pnpm -v)
+        echo "🔍 Pnpm version: $current requires ≥ $pnpm_min_ver"
+        [ "$(printf '%s\n' "$pnpm_min_ver" "$current" | sort -V | head -n1)" != "$pnpm_min_ver" ]
     }
     if notInstalled pnpm || outdated; then
         echo "→ Instalando o pnpm"
@@ -61,10 +60,9 @@ installNodeJs() {
 }
 installDuckdb() {
     outdated() {
-        if [ "$(duckdb --version | sed -E 's/^v([0-9]+\.[0-9]+)\..*/\1/')" -le $duckdb_min_ver ]; then
-            return 0
-        fi
-        return 1
+        current=$(duckdb --version | sed -E 's/^v?([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+        echo "🔍 DuckDB version: $current requires ≥ $duckdb_min_ver"
+        [ "$(printf '%s\n' "$current" "$duckdb_min_ver" | sort -V | head -n1)" != "$duckdb_min_ver" ]
     }
     if notInstalled duckdb || outdated; then
         echo "→ Instalando o duckdb"
@@ -79,7 +77,8 @@ installBrave() {
 }
 desktopShortcut() {
     echo "⏳ Criando atalho na área de trabalho…"
-    ICON_PATH="$(brew --prefix)/share/bot/logo.ico"
+    ICON_PATH="$GIT_REPO_DIR/logo.ico"
+    BIN="$HOME/.nix-profile/bin"
     if isLinux; then
         DESKTOP_DIR=$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")
         mkdir -p "$DESKTOP_DIR"
@@ -87,7 +86,7 @@ desktopShortcut() {
 [Desktop Entry]
 Type=Application
 Name=Bót
-Exec=$(brew --prefix)/bin/bót-dashboard %U
+Exec=$BIN/bót-dashboard %U
 Icon=$ICON_PATH
 Terminal=true
 Categories=Utility;
@@ -103,8 +102,8 @@ EOF
     cp "$ICON_PATH" "$DESKTOP_DIR/logo.ico"
     SHORTCUT="$DESKTOP_DIR/Bót.command"
     cat > "$SHORTCUT" <<EOF
-#!/usr/bin/env bash
-exec "$(brew --prefix)/bin/bót-dashboard" "\$@"
+#!/bin/bash
+exec "$BIN/bót-dashboard" "\$@"
 EOF
     chmod +x "$SHORTCUT"
     echo "✓ Atalho criado em $SHORTCUT"
@@ -129,8 +128,8 @@ if notInstalled nix; then
     curl -L https://nixos.org/nix/install | bash
     if [ -f "$NIX_PROFILE" ]; then
         . "$NIX_PROFILE"
-        for profile in $PROFILES; do
-            if notSourced $profile; then
+        for profile in "${PROFILES[@]}"; do
+            if notSourced "$profile"; then
                 echo "🔧 Sourcing nix.sh em $profile"
                 echo ". \"$NIX_PROFILE\"" >> "$profile"
             fi
@@ -155,14 +154,12 @@ installDuckdb
 installBrave
 
 # 3. Install Bót
-echo "🚀 Instalando Bót…"
-REPO_DIR="$HOME/.bót-install"
-echo "📥 Clonando o repositório de instalação"
-git clone -b nixos git@github.com:drupalista-br/bot-v2_installers.git "$REPO_DIR"
-cd "$REPO_DIR"
+echo "📥 Fazendo o download do instalador do Bót..."
+git clone -b nixos https://github.com/drupalista-br/bot-v2_installers.git "$GIT_REPO_DIR"
+cd "$GIT_REPO_DIR"
 
-echo "📦 Instalando o pacote nix do Bót..."
-nix-env -f default.nix -i
+echo "📦 Instalando o Bót..."
+nix-env -f "bót.nix" -i
 
 desktopShortcut
 
