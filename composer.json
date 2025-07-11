@@ -1,0 +1,16 @@
+{
+    "name": "bot_installers/nixos",
+    "type": "library",
+    "homepage": "https://xn--bt-5ja.srv.br",
+    "license": "proprietary",
+    "authors": [
+        {"name": "Francisco Luz", "email": "drupalista.com.br@gmail.com"}
+    ],
+    "repositories": [
+        {"type": "path", "url": "../../core/utils", "options": {"symlink": true}}
+    ],
+    "require": {
+        "php": ">=8.3",
+        "bot/utils": "@dev"
+    }
+}
