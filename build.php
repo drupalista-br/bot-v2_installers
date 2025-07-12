@@ -29,7 +29,7 @@ $mk_bot_nix = function() use ($version) {
         $return = '';
         foreach(glob("{$_GET['folderpath_bin']}{$_GET['slash']}*") as $filepath_phar) {
             $filename = basename($filepath_phar);
-            $return .= "cp \"\${src}/{$filename}\" \"\$out/bin/{$filename}\"\n";
+            $return .= "cp \"\${src}/bin/{$filename}\" \"\$out/bin/{$filename}\"\n";
         }
         return $return;
     })();
@@ -49,6 +49,7 @@ $mk_bot_nix = function() use ($version) {
             chmod +x \$out/bin/*
         '';
     }
+
     NIX;
     file_put_contents($filepath, $content);
 };
