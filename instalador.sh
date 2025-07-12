@@ -7,7 +7,7 @@ set -eu
 
 php_min_ver="8.3"
 pnpm_min_ver=10
-node_min_ver=20
+node_min_ver=22
 duckdb_min_ver=1.2
 GIT_REPO_DIR="$HOME/.bót-install"
 
@@ -31,7 +31,7 @@ installPhp() {
         return 1
     }
     if notInstalled php || outdated; then
-        echo "→ Instalando o Php"
+        echo "→ Instalando o Php..."
         nix-env -iA nixpkgs.php
     fi
 }
@@ -42,7 +42,7 @@ installPnpm() {
         [ "$(printf '%s\n' "$pnpm_min_ver" "$current" | sort -V | head -n1)" != "$pnpm_min_ver" ]
     }
     if notInstalled pnpm || outdated; then
-        echo "→ Instalando o pnpm"
+        echo "→ Instalando o pnpm..."
         nix-env -iA nixpkgs.pnpm
     fi
 }
@@ -54,7 +54,7 @@ installNodeJs() {
         return 1
     }
     if notInstalled node || outdated; then
-        echo "→ Instalando o Nodejs"
+        echo "→ Instalando o Nodejs..."
         nix-env -iA nixpkgs.nodejs
     fi
 }
@@ -71,12 +71,12 @@ installDuckdb() {
 }
 installBrave() {
     if notInstalled brave-browser && notInstalled brave; then
-        echo "→ Instalando Brave …"
+        echo "→ Instalando Brave..."
         nix-env -iA nixpkgs.brave
     fi
 }
 desktopShortcut() {
-    echo "⏳ Criando atalho na área de trabalho…"
+    echo "⏳ Criando atalho na área de trabalho..."
     ICON_PATH="$GIT_REPO_DIR/logo.ico"
     BIN="$HOME/.nix-profile/bin"
     if isLinux; then
@@ -140,7 +140,7 @@ else
 fi
 
 # 2. Install packages
-packages="git openssl zip unzip unar"
+packages="git openssl zip unzip unrar"
 for pkg in $packages; do
     if notInstalled "$pkg"; then
         echo "→ Instalando $pkg"
