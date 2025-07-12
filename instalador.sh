@@ -5,6 +5,15 @@
 
 set -eu
 
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    if [ "$ID" = "nixos" ]; then
+        echo "⚠️ Este script não é compatível com o NixOS."
+        echo "Veja: https://xn--bt-5ja.srv.br/instalação/nixos"
+        exit 1
+    fi
+fi
+
 php_min_ver="8.3"
 pnpm_min_ver=10
 node_min_ver=22
