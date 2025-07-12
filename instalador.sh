@@ -14,6 +14,7 @@ if [ -f /etc/os-release ]; then
     fi
 fi
 
+export NIXPKGS_ALLOW_UNFREE=1
 php_min_ver="8.3"
 pnpm_min_ver=10
 node_min_ver=22
