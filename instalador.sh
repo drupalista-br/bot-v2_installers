@@ -119,7 +119,7 @@ EOF
     echo "✓ Atalho criado em $SHORTCUT"
 }
 
-# 1. Install nixos if missing
+# 1. Install nix package mananger if missing
 if notInstalled nix; then
     NIX_PROFILE="$HOME/.nix-profile/etc/profile.d/nix.sh"
     PROFILES=("$HOME/.zshrc" "$HOME/.zprofile") # macOS
@@ -134,7 +134,7 @@ if notInstalled nix; then
         PROFILES=("$HOME/.bashrc" "$HOME/.profile")
     fi
 
-    echo "→ Instalando o Nixos"
+    echo "→ Instalando o Nix Gerenciador de Pacotes."
     curl -L https://nixos.org/nix/install | bash
     if [ -f "$NIX_PROFILE" ]; then
         . "$NIX_PROFILE"
@@ -146,7 +146,7 @@ if notInstalled nix; then
         done
     fi
 else
-    echo "✓ Nixos já está instalado."
+    echo "✓ Nix Gerenciador de Pacotes já está instalado."
 fi
 
 # 2. Install packages
