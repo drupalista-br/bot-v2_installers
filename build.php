@@ -6,7 +6,7 @@ use Bót\Utils\f;
 $_GET['slash'] = DIRECTORY_SEPARATOR;
 require __DIR__ . "{$_GET['slash']}vendor{$_GET['slash']}autoload.php";
 Cli::warningsAreExceptions();
-list(,$version) = $argv;
+[$version] = Cli::args($argv, total_expected: 1);
 
 $_GET['folderpath_zip'] = __DIR__ . "{$_GET['slash']}zip";
 $delete_zip = function() {
