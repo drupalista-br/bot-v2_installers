@@ -20,6 +20,7 @@ pnpm_min_ver=10
 node_min_ver=22
 duckdb_min_ver=1.2
 GIT_REPO_DIR="$HOME/.bót-install"
+NIX_PROFILE="$HOME/.nix-profile/etc/profile.d/nix.sh"
 
 isLinux() {
     if [ "$(uname -s)" = "Linux" ]; then
@@ -96,10 +97,9 @@ desktopShortcut() {
 [Desktop Entry]
 Type=Application
 Name=Bót
-Exec=$BIN/bót-dashboard %U
+Exec=bash -c "source $NIX_PROFILE; $BIN/bót-dashboard"
 Icon=$ICON_PATH
-Terminal=true
-Categories=Utility;
+Terminal=false
 EOF
         chmod +x "$DESKTOP_DIR/bót.desktop"
         echo "✓ Atalho criado em $DESKTOP_DIR/bót.desktop"
@@ -113,7 +113,7 @@ EOF
     SHORTCUT="$DESKTOP_DIR/Bót.command"
     cat > "$SHORTCUT" <<EOF
 #!/bin/bash
-exec "$BIN/bót-dashboard" "\$@"
+exec "$BIN/bót-dashboard"
 EOF
     chmod +x "$SHORTCUT"
     echo "✓ Atalho criado em $SHORTCUT"
@@ -121,8 +121,7 @@ EOF
 
 # 1. Install nix package mananger if missing
 if notInstalled nix; then
-    NIX_PROFILE="$HOME/.nix-profile/etc/profile.d/nix.sh"
-    PROFILES=("$HOME/.zshrc" "$HOME/.zprofile") # macOS
+    USER_PROFILES=("$HOME/.zshrc" "$HOME/.zprofile") # macOS
     notSourced() {
         is_sourced=$(grep -F "$NIX_PROFILE" "$1" 2>/dev/null || true)
         if [ -z "$is_sourced" ]; then
@@ -131,17 +130,17 @@ if notInstalled nix; then
         return 1;
     }
     if isLinux; then
-        PROFILES=("$HOME/.bashrc" "$HOME/.profile")
+        USER_PROFILES=("$HOME/.bashrc" "$HOME/.profile")
     fi
 
     echo "→ Instalando o Nix Gerenciador de Pacotes."
     curl -L https://nixos.org/nix/install | bash
     if [ -f "$NIX_PROFILE" ]; then
         . "$NIX_PROFILE"
-        for profile in "${PROFILES[@]}"; do
-            if notSourced "$profile"; then
-                echo "🔧 Sourcing nix.sh em $profile"
-                echo ". \"$NIX_PROFILE\"" >> "$profile"
+        for USER_PROFILE in "${USER_PROFILES[@]}"; do
+            if notSourced "$USER_PROFILE"; then
+                echo "🔧 Sourcing nix.sh em $USER_PROFILE"
+                echo ". \"$NIX_PROFILE\"" >> "$USER_PROFILE"
             fi
         done
     fi
@@ -150,7 +149,7 @@ else
 fi
 
 # 2. Install packages
-packages="git openssl zip unzip unrar"
+packages="git openssl zip unzip unrar fastfetch"
 for pkg in $packages; do
     if notInstalled "$pkg"; then
         echo "→ Instalando $pkg"
