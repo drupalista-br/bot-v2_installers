@@ -2,9 +2,9 @@
 use Bót\Utils\Cli;
 use Bót\Utils\Fs;
 $_GET['slash'] = DIRECTORY_SEPARATOR;
-require __DIR__ . "{$_GET['slash']}vendor{$_GET['slash']}autoload.php";
+require __DIR__ . "/vendor/autoload.php";
 Cli::warningsAreExceptions();
-list(,$version) = $argv;
+[$version] = Cli::args($argv, total_expected: 1);
 
 $_GET['folderpath_bin'] = (function() : string {
     $folderpath = __DIR__ . "{$_GET['slash']}bin";
