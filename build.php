@@ -80,7 +80,8 @@ $mk_zip_and_bót_json_files = function() use ($version) {
             'duckdb',
             'nodejs',
             'pnpm',
-            'uutils-coreutils'
+            'uutils-coreutils',
+            'fastfetch',
         ],
         'pre_uninstall' => [
             '& "$dir\\desinstalar.ps1"',
