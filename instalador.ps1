@@ -120,14 +120,12 @@ scoop install "https://raw.githubusercontent.com/drupalista-br/bot-v2_installers
 # ------------------------------
 # 🧷 Setando as variáveis, as funções e as validações
 # ------------------------------
-$folderpath_php = scoop prefix php
 $folderpath_app = scoop prefix "b${lc_o_acute}t"
-$filepath_php_exe = Join-Path $folderpath_php 'php.exe'
-$folderpath_bin  = Join-Path $folderpath_app  'bin'
-$folderpath_scoop = if ($Env:SCOOP) { $Env:SCOOP } else { Join-Path $Env:USERPROFILE 'scoop' }
+$folderpath_ps1  = Join-Path $folderpath_app  'ps1'
+$folderpath_scoop = Join-Path $Env:USERPROFILE 'scoop'
 $folderpath_shims  = Join-Path $folderpath_scoop 'shims'
 $filepath_shortcuts = Join-Path $folderpath_app 'atalhos.json'
-foreach($dir_file in @($folderpath_bin, $filepath_shortcuts, $folderpath_shims)) {
+foreach($dir_file in @($folderpath_ps1, $filepath_shortcuts, $folderpath_shims)) {
     if (-not (Test-Path $dir_file)) {
         throw "Item NÃO encontrado: ${dir_file}"
     }
@@ -135,30 +133,29 @@ foreach($dir_file in @($folderpath_bin, $filepath_shortcuts, $folderpath_shims))
 
 function mkShim {
     param (
-        [string]$filepath_phar,
-        [string]$filename_exe
+        [string]$filepath_ps1,
+        [string]$filename_shim
     )
-    $shim_cmd = "`"${filepath_php_exe}`" -f `"${filepath_phar}`""
-    scoop shim add $filename_exe $shim_cmd -f
+    scoop shim add $filename_shim "${filepath_ps1}"
 }
 
 # TODO move it to a sepate .ps1 file | https://copilot.microsoft.com/chats/5uz46ZBXo8XWLD6SBS7WY
 function mkShortcut {
     param (
-        [string]$filepath_exe,
-        [string]$filename_exe,
+        [string]$filepath_shim,
+        [string]$filename_shim,
         [ValidateSet('Desktop', 'Programs')]
         [string]$location,
         [string]$description = $null,
         [string]$filepath_icon = $null
     )
     $folderpath_lnk = [Environment]::GetFolderPath($location)
-    $filepath_lnk = Join-Path $folderpath_lnk ("${filename_exe}.lnk")
+    $filepath_lnk = Join-Path $folderpath_lnk ("${filename_shim}.lnk")
 
     $wshShell = New-Object -ComObject WScript.Shell
     $shortcut = $wshShell.CreateShortcut($filepath_lnk)
-    $shortcut.TargetPath = $filepath_exe
-    $shortcut.WorkingDirectory = Split-Path $filepath_exe
+    $shortcut.TargetPath = $filepath_shim
+    $shortcut.WorkingDirectory = Split-Path $filepath_shim
     if ($description) {
         $shortcut.Description = $description
     }
@@ -174,13 +171,13 @@ function mkShortcut {
 # TODO https://copilot.microsoft.com/chats/B5m2XWxE4xAfkYenANtui
 
 # ------------------------------
-# 🧷 Criando os .EXEs
+# 🧷 Criando os shims
 # ------------------------------
-Get-ChildItem -Path $folderpath_bin -File | ForEach-Object {
-    $filename_exe = [System.IO.Path]::GetFileName($_.FullName)
+Get-ChildItem -Path $folderpath_ps1 -File | ForEach-Object {
+    $filename_shim = [System.IO.Path]::GetFileName($_.FullName)
     $params = @{
-        filepath_phar = $_.FullName
-        filename_exe = $filename_exe
+        filepath_ps1 = $_.FullName
+        filename_shim = $filename_shim
     }
     mkShim @params
 }
@@ -190,10 +187,10 @@ Get-ChildItem -Path $folderpath_bin -File | ForEach-Object {
 # ------------------------------
 $atalhos = Get-Content $filepath_shortcuts -Raw | ConvertFrom-Json
 foreach ($atalho in $atalhos) {
-    $filepath_exe = Join-Path $folderpath_shims "${atalho}.exe"
+    $filepath_shim = Join-Path $folderpath_shims $atalho
     $params = @{
-        filepath_exe = $filepath_exe
-        filename_exe = $atalho
+        filepath_shim = $filepath_shim
+        filename_shim = $atalho
         location = 'Desktop'
     }
     mkShortcut @params
@@ -202,11 +199,11 @@ foreach ($atalho in $atalhos) {
 # ------------------------------
 # 🧷 Criando o atalho no menu Startup
 # ------------------------------
-$filename_exe = "b${lc_o_acute}-dashboard.exe"
-$filepath_exe = Join-Path $folderpath_shims $filename_exe
+$filename_shim = "b${lc_o_acute}-dashboard"
+$filepath_shim = Join-Path $folderpath_shims $filename_shim
 $params = @{
-    filepath_exe = $filepath_exe
-    filename_exe = $filename_exe
+    filepath_shim = $filepath_shim
+    filename_shim = $filename_shim
     location = 'Programs'
     description = "B${lc_o_acute}t | Obriga${lc_c_cedilla}${lc_o_tilde}es Fiscais Eireli"
 }
