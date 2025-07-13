@@ -26,12 +26,14 @@ $mk_bin_and_ps1_folders = function() {
                 throw new \Exception(Exec::$error);
         }
     };
-    $folderpath_bin_from = "{$folderpath_root}bins{$_GET['slash']}bin";
-    $folderpath_bin_to = (function() use ($delete_folder) : string {
-        $folderpath = "{$_GET['folderpath_zip']}{$_GET['slash']}bin";
-        $delete_folder($folderpath);
-        return Fs::mkdir($folderpath);
-    })();
+    $folderpath_bin = [
+        'from' => "{$folderpath_root}bins{$_GET['slash']}bin",
+        'to' => (function() use ($delete_folder) : string {
+            $folderpath = "{$_GET['folderpath_zip']}{$_GET['slash']}bin";
+            $delete_folder($folderpath);
+            return Fs::mkdir($folderpath);
+        })(),
+    ];
     $folderpath_ps1 = (function() use ($delete_folder) : string {
         $folderpath = "{$_GET['folderpath_zip']}{$_GET['slash']}ps1";
         $delete_folder($folderpath);
@@ -47,11 +49,11 @@ $mk_bin_and_ps1_folders = function() {
         PS1;
         file_put_contents($filepath_ps1, $content);
     };
-    foreach(glob("{$folderpath_bin_from}{$_GET['slash']}*") as $filepath_phar_from) {
+    foreach(glob("{$folderpath_bin['from']}{$_GET['slash']}*") as $filepath_phar_from) {
         $filename_phar = pathinfo($filepath_phar)['filename'];
-        $filepath_phar_to = "{$folderpath_bin_to}{$_GET['slash']}{$filename_phar}";
+        $filepath_phar_to = "{$folderpath_bin['to']}{$_GET['slash']}{$filename_phar}";
         $mk_ps1($filename_phar);
-        copy($filepath_phar_from, $folderpath_bin_to);
+        copy($filepath_phar_from, $folderpath_bin['to']);
     }
 };
 $mk_zip_and_bót_json_files = function() use ($version) {
