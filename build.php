@@ -7,10 +7,9 @@ require __DIR__ . "/vendor/autoload.php";
 Cli::warningsAreExceptions();
 [$version] = Cli::args($argv, total_expected: 1);
 
-$_GET['slash'] = DIRECTORY_SEPARATOR;
-$_GET['folderpath_zip'] = __DIR__ . "{$_GET['slash']}zip";
+$_GET['folderpath_zip'] = __DIR__ . "/zip";
 $delete_zip = function() {
-    foreach(glob(__DIR__ . "{$_GET['slash']}*.zip") as $filepath_zip)
+    foreach(glob(__DIR__ . "/*.zip") as $filepath_zip)
         unlink($filepath_zip);
 };
 /**
@@ -27,15 +26,15 @@ $mk_bin_and_ps1_folders = function() {
         }
     };
     $folderpath_bin = [
-        'from' => "{$folderpath_root}bins{$_GET['slash']}bin",
+        'from' => "{$folderpath_root}bins/bin",
         'to' => (function() use ($delete_folder) : string {
-            $folderpath = "{$_GET['folderpath_zip']}{$_GET['slash']}bin";
+            $folderpath = "{$_GET['folderpath_zip']}/bin";
             $delete_folder($folderpath);
             return Fs::mkdir($folderpath);
         })(),
     ];
     $folderpath_ps1 = (function() use ($delete_folder) : string {
-        $folderpath = "{$_GET['folderpath_zip']}{$_GET['slash']}ps1";
+        $folderpath = "{$_GET['folderpath_zip']}/ps1";
         $delete_folder($folderpath);
         return Fs::mkdir($folderpath);
     })();
@@ -49,9 +48,9 @@ $mk_bin_and_ps1_folders = function() {
         PS1;
         file_put_contents($filepath_ps1, $content);
     };
-    foreach(glob("{$folderpath_bin['from']}{$_GET['slash']}*") as $filepath_phar_from) {
+    foreach(glob("{$folderpath_bin['from']}/*") as $filepath_phar_from) {
         $filename_phar = pathinfo($filepath_phar)['filename'];
-        $filepath_phar_to = "{$folderpath_bin['to']}{$_GET['slash']}{$filename_phar}";
+        $filepath_phar_to = "{$folderpath_bin['to']}/{$filename_phar}";
         $mk_ps1($filename_phar);
         copy($filepath_phar_from, $folderpath_bin['to']);
     }
@@ -60,11 +59,11 @@ $mk_zip_and_bót_json_files = function() use ($version) {
     $filename_zip = "bót-{$version}.zip";
     $filepath_zip = (function() use ($filename_zip) : string {
         $folderpath = __DIR__;
-        $filepath_zip = "{$folderpath}{$_GET['slash']}{$filename_zip}";
+        $filepath_zip = "{$folderpath}/{$filename_zip}";
         Zip::folder($_GET['folderpath_zip'], $filepath_zip);
         return $filepath_zip;
     })();
-    $filepath_json = __DIR__ . "{$_GET['slash']}bót.json";
+    $filepath_json = __DIR__ . "/bót.json";
     $json = [
         'version' => $version,
         'description' => "Bót | Obrigações Tributárias Eireli",
@@ -84,6 +83,7 @@ $mk_zip_and_bót_json_files = function() use ($version) {
             'pnpm',
             'uutils-coreutils',
             'fastfetch',
+            'fd',
         ],
         'pre_uninstall' => [
             '& "$dir\\desinstalar.ps1"',
