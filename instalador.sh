@@ -149,7 +149,7 @@ else
 fi
 
 # 2. Install packages
-packages="git openssl zip unzip unrar fastfetch"
+packages="git openssl zip unzip unrar fastfetch fd"
 for pkg in $packages; do
     if notInstalled "$pkg"; then
         echo "→ Instalando $pkg"
