@@ -1,11 +1,11 @@
 <?php
-use Bót\Utils\Cli;
+use Bót\Utils\Args;
 use Bót\Utils\Zip;
 use Bót\Utils\Fs;
 use Bót\Utils\f;
 require __DIR__ . "/vendor/autoload.php";
-Cli::warningsAreExceptions();
-[$version] = Cli::args($argv, total_expected: 1);
+f::warningsAreExceptions();
+[$version] = Args::fixedNumber($argv, total_expected: 1);
 
 $_GET['folderpath_zip'] = __DIR__ . "/zip";
 $delete_zip = function() {
