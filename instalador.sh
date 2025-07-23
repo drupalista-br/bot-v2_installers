@@ -84,6 +84,17 @@ installBrave() {
     if notInstalled brave-browser && notInstalled brave; then
         echo "→ Instalando Brave..."
         nix-env -iA nixpkgs.brave
+        filepath_brave="$(command -v brave)"
+        folderpath="$(dirname "${filepath_brave}")"
+        if [ ! -e "${folderpath}/brave-browser" ]; then
+            ln -s "${filepath_brave}" "${folderpath}/brave-browser"
+        fi
+    fi
+}
+installGedit() {
+    if notInstalled gedit; then
+        echo "→ Instalando Gedit..."
+        nix-env -iA nixpkgs.gedit
     fi
 }
 desktopShortcut() {
@@ -161,6 +172,7 @@ installPnpm
 installNodeJs
 installDuckdb
 installBrave
+installGedit
 
 # 3. Install Bót
 echo "📥 Fazendo o download do instalador do Bót..."
