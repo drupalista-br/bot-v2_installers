@@ -16,11 +16,9 @@ fi
 
 export NIXPKGS_ALLOW_UNFREE=1
 php_min_ver="8.3"
-pnpm_min_ver=10
 node_min_ver=22
-duckdb_min_ver=1.2
-GIT_REPO_DIR="$HOME/.bót-install"
-NIX_PROFILE="$HOME/.nix-profile/etc/profile.d/nix.sh"
+folderpath_git_repo="$HOME/.bót-install"
+filepath_nix_profile="$HOME/.nix-profile/etc/profile.d/nix.sh"
 
 isLinux() {
     if [ "$(uname -s)" = "Linux" ]; then
@@ -46,17 +44,6 @@ installPhp() {
         nix-env -iA nixpkgs.php
     fi
 }
-installPnpm() {
-    outdated() {
-        current=$(pnpm -v)
-        echo "🔍 Pnpm version: $current requires ≥ $pnpm_min_ver"
-        [ "$(printf '%s\n' "$pnpm_min_ver" "$current" | sort -V | head -n1)" != "$pnpm_min_ver" ]
-    }
-    if notInstalled pnpm || outdated; then
-        echo "→ Instalando o pnpm..."
-        nix-env -iA nixpkgs.pnpm
-    fi
-}
 installNodeJs() {
     outdated() {
         if ! node -e "process.exit(Number(process.version.split('.')[0].slice(1)) >= $node_min_ver ? 0 : 1)" 2>/dev/null; then
@@ -67,17 +54,6 @@ installNodeJs() {
     if notInstalled node || outdated; then
         echo "→ Instalando o Nodejs..."
         nix-env -iA nixpkgs.nodejs
-    fi
-}
-installDuckdb() {
-    outdated() {
-        current=$(duckdb --version | sed -E 's/^v?([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
-        echo "🔍 DuckDB version: $current requires ≥ $duckdb_min_ver"
-        [ "$(printf '%s\n' "$current" "$duckdb_min_ver" | sort -V | head -n1)" != "$duckdb_min_ver" ]
-    }
-    if notInstalled duckdb || outdated; then
-        echo "→ Instalando o duckdb"
-        nix-env -iA nixpkgs.duckdb
     fi
 }
 installBrave() {
@@ -91,67 +67,61 @@ installBrave() {
         fi
     fi
 }
-installGedit() {
-    if notInstalled gedit; then
-        echo "→ Instalando Gedit..."
-        nix-env -iA nixpkgs.gedit
-    fi
-}
 desktopShortcut() {
     echo "⏳ Criando atalho na área de trabalho..."
-    ICON_PATH="$GIT_REPO_DIR/logo.ico"
-    BIN="$HOME/.nix-profile/bin"
+    filepath_icon="${folderpath_git_repo}/logo.ico"
+    folderpath_bin="$HOME/.nix-profile/bin"
     if isLinux; then
-        DESKTOP_DIR=$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")
-        mkdir -p "$DESKTOP_DIR"
-        cat > "$DESKTOP_DIR/bót.desktop" <<EOF
+        folderpath_desktop=$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")
+        mkdir -p "${folderpath_desktop}"
+        cat > "${folderpath_desktop}/bót.desktop" <<EOF
 [Desktop Entry]
 Type=Application
 Name=Bót
-Exec=bash -c "source $NIX_PROFILE; $BIN/bót-dashboard"
-Icon=$ICON_PATH
+Exec=bash -c "source ${filepath_nix_profile}; ${folderpath_bin}/bót-dashboard"
+Icon=${filepath_icon}
 Terminal=false
 EOF
-        chmod +x "$DESKTOP_DIR/bót.desktop"
-        echo "✓ Atalho criado em $DESKTOP_DIR/bót.desktop"
+        chmod +x "${folderpath_desktop}/bót.desktop"
+        echo "✓ Atalho criado em ${folderpath_desktop}/bót.desktop"
         return
     fi
 
     # Mac
-    DESKTOP_DIR="$HOME/Desktop"
-    mkdir -p "$DESKTOP_DIR"
-    cp "$ICON_PATH" "$DESKTOP_DIR/logo.ico"
-    SHORTCUT="$DESKTOP_DIR/Bót.command"
-    cat > "$SHORTCUT" <<EOF
+    folderpath_desktop="$HOME/Desktop"
+    mkdir -p "${folderpath_desktop}"
+    cp "${filepath_icon}" "${folderpath_desktop}/logo.ico"
+    filepath_shortcut="${folderpath_desktop}/Bót.command"
+    cat > "${filepath_shortcut}" <<EOF
 #!/bin/bash
-exec "$BIN/bót-dashboard"
+exec "${folderpath_bin}/bót-dashboard"
 EOF
-    chmod +x "$SHORTCUT"
-    echo "✓ Atalho criado em $SHORTCUT"
+    chmod +x "${filepath_shortcut}"
+    echo "✓ Atalho criado em ${filepath_shortcut}"
 }
 
 # 1. Install nix package mananger if missing
 if notInstalled nix; then
-    USER_PROFILES=("$HOME/.zshrc" "$HOME/.zprofile") # macOS
+    filepath_user_profiles=("$HOME/.zshrc" "$HOME/.zprofile") # macOS
     notSourced() {
-        is_sourced=$(grep -F "$NIX_PROFILE" "$1" 2>/dev/null || true)
+        is_sourced=$(grep -F "${filepath_nix_profile}" "$1" 2>/dev/null || true)
         if [ -z "$is_sourced" ]; then
             return 0;
         fi
         return 1;
     }
     if isLinux; then
-        USER_PROFILES=("$HOME/.bashrc" "$HOME/.profile")
+        filepath_user_profiles=("$HOME/.bashrc" "$HOME/.profile")
     fi
 
     echo "→ Instalando o Nix Gerenciador de Pacotes."
     curl -L https://nixos.org/nix/install | bash
-    if [ -f "$NIX_PROFILE" ]; then
-        . "$NIX_PROFILE"
-        for USER_PROFILE in "${USER_PROFILES[@]}"; do
-            if notSourced "$USER_PROFILE"; then
-                echo "🔧 Sourcing nix.sh em $USER_PROFILE"
-                echo ". \"$NIX_PROFILE\"" >> "$USER_PROFILE"
+    if [ -f "${filepath_nix_profile}" ]; then
+        . "${filepath_nix_profile}"
+        for filepath_user_profile in "${filepath_user_profiles[@]}"; do
+            if notSourced "${filepath_user_profile}"; then
+                echo "🔧 Sourcing nix.sh em ${filepath_user_profile}"
+                echo ". \"${filepath_nix_profile}\"" >> "${filepath_user_profile}"
             fi
         done
     fi
@@ -160,24 +130,26 @@ else
 fi
 
 # 2. Install packages
-packages="git openssl zip unzip unrar fastfetch fd"
+packages="duckdb pnpm git openssl zip unzip unrar fastfetch fd gedit"
 for pkg in $packages; do
-    if notInstalled "$pkg"; then
-        echo "→ Instalando $pkg"
-        nix-env -iA nixpkgs."$pkg"
+    if notInstalled "${pkg}"; then
+        echo "→ Instalando ${pkg}"
+        nix-env -iA nixpkgs."${pkg}"
     fi
 done
 installPhp
-installPnpm
 installNodeJs
-installDuckdb
 installBrave
-installGedit
 
 # 3. Install Bót
-echo "📥 Fazendo o download do instalador do Bót..."
-git clone -b nixos https://github.com/drupalista-br/bot-v2_installers.git "$GIT_REPO_DIR"
-cd "$GIT_REPO_DIR"
+if [ -d "${folderpath_git_repo}" ]; then
+    echo "🗘 Atualizando o instalador do Bót..."
+    git -C "${folderpath_git_repo}" pull origin nixos
+else
+    echo "📥 Fazendo o download do instalador do Bót..."
+    git clone -b nixos https://github.com/drupalista-br/bot-v2_installers.git "${folderpath_git_repo}"
+fi
+cd "${folderpath_git_repo}"
 
 echo "📦 Instalando o Bót..."
 nix-env -f "bót.nix" -i
