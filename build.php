@@ -38,6 +38,23 @@ $mk_bin_and_ps1_folders = function() {
         $delete_folder($folderpath);
         return Fs::mkdir($folderpath);
     })();
+    $mk_bot_browser_ps1 = function() use ($folderpath_ps1) {
+        $filepath_ps1 = "{$folderpath_ps1}\\bót-browser.ps1";
+        $content = <<<PS1
+        param(
+            [Parameter(ValueFromRemainingArguments = \$true)]
+            [string[]]\$Args
+        )
+        \$browsers = @("chromium", "chrome")
+        foreach (\$browser in \$browsers) {
+            if (Get-Command \$browser -ErrorAction SilentlyContinue) {
+                Start-Process \$browser -ArgumentList \$Args
+                break
+            }
+        }
+        PS1;
+        file_put_contents($filepath_ps1, $content);
+    };
     $mk_ps1 = function(string $filename_phar) use ($folderpath_ps1) {
         $filepath_ps1 = "{$folderpath_ps1}\\{$filename_phar}";
         $content = <<<PS1
@@ -48,6 +65,7 @@ $mk_bin_and_ps1_folders = function() {
         PS1;
         file_put_contents($filepath_ps1, $content);
     };
+    $mk_bot_browser_ps1();
     foreach(glob("{$folderpath_bin['from']}/*") as $filepath_phar_from) {
         $filename_phar = pathinfo($filepath_phar)['filename'];
         $filepath_phar_to = "{$folderpath_bin['to']}/{$filename_phar}";
