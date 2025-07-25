@@ -1,6 +1,4 @@
-#!/bin/sh
-# POSIX‐compliant installer for Bót
-#
+#!/usr/bin/env bash
 # Usage: curl -fsSL https://instalador.xn--bt-5ja.srv.br/nix | sh
 
 set -eu
@@ -56,16 +54,25 @@ installNodeJs() {
         nix-env -iA nixpkgs.nodejs
     fi
 }
-installBrave() {
-    if notInstalled brave-browser && notInstalled brave; then
-        echo "→ Instalando Brave..."
-        nix-env -iA nixpkgs.brave
-        filepath_brave="$(command -v brave)"
-        folderpath="$(dirname "${filepath_brave}")"
-        if [ ! -e "${folderpath}/brave-browser" ]; then
-            ln -s "${filepath_brave}" "${folderpath}/brave-browser"
+installBrowser() {
+    browsers=("google-chrome" "google-chrome-stable" "chrome" "chromium" "chromium-browser")
+    folderpath_nix_bin="$HOME/.nix-profile/bin"
+    filepath_browser_installed="${folderpath_nix_bin}/chromium"
+    filepath_bot_browser="${folderpath_nix_bin}/bót-browser"
+    no_browser_installed=true
+    for browser in "${browsers[@]}"; do
+        filepath_browser="$(command -v "${browser}")"
+        if [ -x "${filepath_browser}" ]; then
+            no_browser_installed=false
+            filepath_browser_installed="${filepath_browser}"
+            break
         fi
+    done
+    if [ "${no_browser_installed}" = true ]; then
+        echo "→ Instalando Chromium..."
+        nix-env -iA nixpkgs.chromium
     fi
+    ln -sf "${filepath_browser_installed}" "${filepath_bot_browser}"
 }
 desktopShortcut() {
     echo "⏳ Criando atalho na área de trabalho..."
@@ -139,7 +146,7 @@ for pkg in $packages; do
 done
 installPhp
 installNodeJs
-installBrave
+installBrowser
 
 # 3. Install Bót
 if [ -d "${folderpath_git_repo}" ]; then
