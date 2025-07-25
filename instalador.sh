@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: curl -fsSL https://instalador.xn--bt-5ja.srv.br/nix | sh
+# Usage: curl -fsSL https://instalador.xn--bt-5ja.srv.br/nix | bash
 
 set -eu
 
@@ -55,23 +55,40 @@ installNodeJs() {
     fi
 }
 installBrowser() {
-    browsers=("google-chrome" "google-chrome-stable" "chrome" "chromium" "chromium-browser")
+    searchBrowserInPATH() {
+        declare -a checked_folderpaths_PATH=()
+        wasFolderpathChecked() {
+            local folderpath="$1"
+            for seen in "${checked_folderpaths_PATH[@]}"; do
+                [[ "$folderpath" == "$seen" ]] && return 0
+            done
+            return 1
+        }
+        IFS=':' read -ra folderpaths_PATH <<< "$PATH"
+        for folderpath in "${folderpaths_PATH[@]}"; do
+            wasFolderpathChecked "$folderpath" && continue
+            checked_folderpaths_PATH+=("$folderpath")
+            for exe in "$folderpath"/*; do
+                name=$(basename "$exe" 2>/dev/null)
+                echo "$name" | grep -Ei '^(google-)?chrome(-stable)?$|^chromium(-browser)?$' >/dev/null
+                if [ $? -eq 0 ]; then
+                    echo "$name"
+                    return 0
+                fi
+            done
+        done 2>/dev/null
+        return 1
+    }
+    echo "Checando se o seu sistema tem google chrome ou chromium instalado..."
+    browser="$(searchBrowserInPATH)"
     folderpath_nix_bin="$HOME/.nix-profile/bin"
-    filepath_browser_installed="${folderpath_nix_bin}/chromium"
-    filepath_bot_browser="${folderpath_nix_bin}/bót-browser"
-    no_browser_installed=true
-    for browser in "${browsers[@]}"; do
-        filepath_browser="$(command -v "${browser}")"
-        if [ -x "${filepath_browser}" ]; then
-            no_browser_installed=false
-            filepath_browser_installed="${filepath_browser}"
-            break
-        fi
-    done
-    if [ "${no_browser_installed}" = true ]; then
+    if [ -z "$browser" ]; then
+        browser="chromium"
         echo "→ Instalando Chromium..."
         nix-env -iA nixpkgs.chromium
     fi
+    filepath_browser_installed=$(command -v "$browser")
+    filepath_bot_browser="${folderpath_nix_bin}/bót-browser"
     ln -sf "${filepath_browser_installed}" "${filepath_bot_browser}"
 }
 desktopShortcut() {
@@ -111,11 +128,8 @@ EOF
 if notInstalled nix; then
     filepath_user_profiles=("$HOME/.zshrc" "$HOME/.zprofile") # macOS
     notSourced() {
-        is_sourced=$(grep -F "${filepath_nix_profile}" "$1" 2>/dev/null || true)
-        if [ -z "$is_sourced" ]; then
-            return 0;
-        fi
-        return 1;
+        grep -Fq "${filepath_nix_profile}" "$1" || return 0
+        return 1
     }
     if isLinux; then
         filepath_user_profiles=("$HOME/.bashrc" "$HOME/.profile")
