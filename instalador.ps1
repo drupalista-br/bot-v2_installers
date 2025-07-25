@@ -89,13 +89,19 @@ if (-not (Get-Command curl.exe -ErrorAction SilentlyContinue)) {
 }
 
 # ------------------------------
-# 🦁 Instalando o Brave
+# 🦁 Instalando o Navegador
 # ------------------------------
-if (-not (Get-Command brave.exe -ErrorAction SilentlyContinue)) {
-    Write-Host "`n🦁 Instalando Brave. Usado como GUI do B${lc_o_acute}t."
-    scoop install brave
-} else {
-    Write-Host "`n✅ Brave j${lc_a_acute} est${lc_a_acute} instalado."
+$browsers = @("chromium", "chrome")
+$no_browser_installed = $true
+foreach ($browser in $browsers) {
+    if (Get-Command $browser -ErrorAction SilentlyContinue) {
+        $no_browser_installed = $false
+        break
+    }
+}
+if ($no_browser_installed) {
+    Write-Host "`n✅ Instalando Chromium. Usado como GUI do B${lc_o_acute}t."
+    scoop install extras/chromium
 }
 
 # ------------------------------
