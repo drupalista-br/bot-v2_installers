@@ -17,7 +17,18 @@ php_min_ver="8.3"
 node_min_ver=22
 folderpath_git_repo="$HOME/.bót-install"
 filepath_nix_profile="$HOME/.nix-profile/etc/profile.d/nix.sh"
-
+mkdir -p "$HOME/bin"
+if ! echo "$PATH" | grep -q "$HOME/bin"; then
+    shell_name="$(basename "$SHELL")"
+    if [ "$shell_name" = "bash" ]; then
+        profile="$HOME/.bash_profile"
+    elif [ "$shell_name" = "zsh" ]; then
+        profile="$HOME/.zprofile"
+    else
+        profile="$HOME/.profile"
+    fi
+    echo 'export PATH="$HOME/bin:$PATH"' >> "$profile"
+fi
 isLinux() {
     if [ "$(uname -s)" = "Linux" ]; then
         return 0
@@ -81,14 +92,13 @@ installBrowser() {
     }
     echo "Checando se o seu sistema tem google chrome ou chromium instalado..."
     browser="$(searchBrowserInPATH)"
-    folderpath_nix_bin="$HOME/.nix-profile/bin"
     if [ -z "$browser" ]; then
         browser="chromium"
         echo "→ Instalando Chromium..."
         nix-env -iA nixpkgs.chromium
     fi
     filepath_browser_installed=$(command -v "$browser")
-    filepath_bot_browser="${folderpath_nix_bin}/bót-browser"
+    filepath_bot_browser="$HOME/bin/bót-browser"
     ln -sf "${filepath_browser_installed}" "${filepath_bot_browser}"
 }
 desktopShortcut() {
@@ -102,7 +112,7 @@ desktopShortcut() {
 [Desktop Entry]
 Type=Application
 Name=Bót
-Exec=bash -c "source ${filepath_nix_profile}; ${folderpath_bin}/bót-dashboard"
+Exec=bash -c "export PATH="${HOME}/bin:${PATH}"; source ${filepath_nix_profile}; ${folderpath_bin}/bót-dashboard"
 Icon=${filepath_icon}
 Terminal=false
 EOF
