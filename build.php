@@ -31,5 +31,5 @@ $mk_bot_nix = function() use ($version) {
     NIX;
     file_put_contents($filepath, $content);
 };
-Shared::copy();
+Shared::copy(__DIR__);
 $mk_bot_nix();
