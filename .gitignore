@@ -1,2 +1,5 @@
 composer.lock
+bót.nix
 /vendor/
+/bin/
+/js/
