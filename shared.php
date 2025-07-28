@@ -8,25 +8,36 @@ class Shared {
      * To: bin/*
      * To: js/*
      */
-    static function copy() {
-        $folderpath_root = dirname(__DIR__, 2);
+    static function copy(string $folderpath_installer) {
+        $folderpath_root = dirname($folderpath_installer, 2);
         $folderpath_from = "{$folderpath_root}/bins";
-        $folderpath_to = Fs::mkdir(__DIR__);
-        $bin_failed = function() use ($folderpath_from, $folderpath_to) : bool {
-            $folderpath_to_bin = "{$folderpath_to}/bin";
-            if (!file_exists($folderpath_to_bin))
-                mkdir($folderpath_to_bin, recursive: TRUE);
-            return !Exec::foreground('cp', ['-r', "{$folderpath_from}/bin/*", "{$folderpath_to_bin}/"]);
+        $folderpath_to = Fs::mkdir($folderpath_installer);
+        $folders = ['bin', 'js'];
+        $delete = function() use ($folderpath_installer, $folders) {
+            foreach($folders as $folder) {
+                $folderpath_to = "{$folderpath_installer}/{$folder}";
+                if (file_exists($folderpath_to)) {
+                    $failed = !Exec::foreground('rm', ['-rf', "'{$folderpath_to}'"]);
+                    if ($failed)
+                        throw new \Exception(Exec::$error);
+                }
+            }
         };
-        $js_failed = function() use ($folderpath_from, $folderpath_to) : bool {
-            $folderpath_to_js = "{$folderpath_to}/js";
-            if (!file_exists($folderpath_to_js))
-                mkdir($folderpath_to_js, recursive: TRUE);
-            return !Exec::foreground('cp', ['-r', "{$folderpath_from}/js/*", "{$folderpath_to_js}/"]);
+        $copy = function() use ($folderpath_from, $folderpath_installer, $folders) {
+            foreach($folders as $folder) {
+                $folderpath_to = "{$folderpath_installer}/{$folder}";
+                if (file_exists($folderpath_to)) {
+                    $failed = !Exec::foreground('rm', ['-rf', "'{$folderpath_to}'"]);
+                    if ($failed)
+                        throw new \Exception(Exec::$error);
+                }
+                mkdir($folderpath_to, recursive: TRUE);
+                $failed = !Exec::foreground('cp', ['-r', "'{$folderpath_from}/{$folder}'/*", "'{$folderpath_to}'/"]);
+                if ($failed)
+                    throw new \Exception(Exec::$error);
+            }
         };
-        if ($bin_failed())
-            throw new \Exception(Exec::$error);
-        if ($js_failed())
-            throw new \Exception(Exec::$error);
+        $delete();
+        $copy();
     }
 }
