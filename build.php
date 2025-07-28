@@ -4,10 +4,10 @@ use Bót\Utils\Args;
 use Bót\Utils\Fs;
 use Bót\Utils\f;
 require __DIR__ . '/vendor/autoload.php';
-require __DIR__ . '/shared.php';
+require __DIR__ . '/functions.php';
 f::warningsAreExceptions();
 [$version] = Args::fixedNumber($argv, total_expected: 1);
-$mk_bot_nix = function() use ($version) {
+$mk_nix_file = function() use ($version) {
     $filepath = __DIR__ . "/bót.nix";
     $content = <<<NIX
     # Auto-generated Nix package for Bót — do not edit manually
@@ -31,5 +31,8 @@ $mk_bot_nix = function() use ($version) {
     NIX;
     file_put_contents($filepath, $content);
 };
-Shared::copy(__DIR__);
-$mk_bot_nix();
+$folderpath_installer = __DIR__;
+$folders = ['bin', 'js'];
+Functions::delete($folderpath_installer, $folders);
+Functions::copyFromBinsTo($folderpath_installer, $folders);
+$mk_nix_file();
