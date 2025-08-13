@@ -25,22 +25,9 @@ $mk_exe_PS1s = function() {
         return $folderpath;
     })();
     $mk_bót_browser_ps1 = function() use ($folderpath_ps1) {
-        $filepath_ps1 = "{$folderpath_ps1}/bót-browser.ps1";
-        $content = <<<PS1
-        param(
-            [Parameter(ValueFromRemainingArguments = \$true)]
-            [string[]]\$Args
-        )
-        \$browsers = @("chromium", "chrome")
-        foreach (\$browser in \$browsers) {
-            if (Get-Command \$browser -ErrorAction SilentlyContinue) {
-                Start-Process \$browser -ArgumentList \$Args
-                break
-            }
-        }
-
-        PS1;
-        file_put_contents($filepath_ps1, $content);
+        $filepath_from = __DIR__ . '/bót-browser.ps1';
+        $filepath_to = "{$folderpath_ps1}/bót-browser.ps1";
+        copy($filepath_from, $filepath_to);
     };
     $mk_exe_ps1 = function(string $folderpath) use ($folderpath_ps1) {
         $mk_ps1 = function(string $filename_phar) use ($folderpath_ps1) {
