@@ -42,8 +42,11 @@ $mk_exe_PS1s = function() {
             file_put_contents($filepath_ps1, $content);
         };
         foreach(glob("{$folderpath}/*") as $filepath_phar_from) {
-            $filename_phar = pathinfo($filepath_phar_from)['filename'];
-            $mk_ps1($filename_phar);
+            $pathinfo = pathinfo($filepath_phar_from);
+            $filename_phar = $pathinfo['filename'];
+            $not_json = $pathinfo['extension'] !== 'json';
+            if ($not_json)
+                $mk_ps1($filename_phar);
         }
     };
     $is_js_folder = fn(string $folderpath) : bool => pathinfo($folderpath)['filename'] === 'js';
