@@ -184,6 +184,7 @@ cd "${folderpath_git_repo}"
 
 echo "📦 Instalando o Bót..."
 nix-env -f "bót.nix" -i
+bót set-env-variables
 
 desktopShortcut
 

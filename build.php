@@ -32,7 +32,7 @@ $mk_nix_file = function() use ($version) {
     file_put_contents($filepath, $content);
 };
 $folderpath_installer = __DIR__;
-$folders = ['bin', 'js'];
+$folders = ['bin', 'scripts'];
 Functions::delete($folderpath_installer, $folders);
 Functions::copyFromBinsTo($folderpath_installer, $folders);
 $mk_nix_file();
