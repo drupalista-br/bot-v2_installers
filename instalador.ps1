@@ -107,14 +107,12 @@ if ($no_browser_installed) {
 # ------------------------------
 # 📝 Instalando o LibreOffice
 # ------------------------------
-<#
 if (-not (Get-Command soffice.exe -ErrorAction SilentlyContinue)) {
-    Write-Host "`n📝 Instalando Libreoffice. Usado para converter planilhas em Tsv."
+    Write-Host "`n📝 Instalando Libreoffice..."
     scoop install extras/libreoffice
 } else {
     Write-Host "`n✅ LibreOffice j${lc_a_acute} est${lc_a_acute} instalado."
 }
-#>
 
 # ------------------------------
 # 📥 Instalando o Bót
@@ -177,7 +175,7 @@ function mkShortcut {
 # TODO https://copilot.microsoft.com/chats/B5m2XWxE4xAfkYenANtui
 
 # ------------------------------
-# 🧷 Criando os shims
+# 🧷 Criando os shims e variáveis de ambiente
 # ------------------------------
 Get-ChildItem -Path $folderpath_ps1 -File | ForEach-Object {
     $filename_shim = [System.IO.Path]::GetFileName($_.FullName)
@@ -187,6 +185,7 @@ Get-ChildItem -Path $folderpath_ps1 -File | ForEach-Object {
     }
     mkShim @params
 }
+& "b${lc_o_acute}t" set-env-variables
 
 # ------------------------------
 # 🧷 Criando os atalhos na área de trabalho

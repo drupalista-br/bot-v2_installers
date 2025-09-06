@@ -49,10 +49,10 @@ $mk_exe_PS1s = function() {
                 $mk_ps1($filename_phar);
         }
     };
-    $is_js_folder = fn(string $folderpath) : bool => pathinfo($folderpath)['filename'] === 'js';
+    $is_scripts_folder = fn(string $folderpath) : bool => pathinfo($folderpath)['filename'] === 'scripts';
     $mk_bót_browser_ps1();
     foreach(glob(Functions::folderpathBins() . '/*') as $folderpath) {
-        if ($is_js_folder($folderpath))
+        if ($is_scripts_folder($folderpath))
             continue;
         $mk_exe_ps1($folderpath);
     }
@@ -92,7 +92,7 @@ $mk_bót_json = function(string $filepath_zip) use ($version, $filename_zip) {
     f::array2json($filepath_json, $json);
 };
 Functions::delete(__DIR__, ['zip']);
-Functions::copyFromBinsTo($_GET['folderpath_zip'], ['js']);
+Functions::copyFromBinsTo($_GET['folderpath_zip'], ['scripts']);
 $delete_zip_file();
 $mk_exe_PS1s();
 $copy_from_local();
