@@ -36,6 +36,7 @@ $mk_exe_PS1s = function() {
             \$lc_o_acute = [char]0x00F3    # ó
             \$folderpath_bin = Join-Path (scoop prefix "b\${lc_o_acute}t") 'bin'
             \$filepath_phar = Join-Path \$folderpath_bin '{$filename_phar}'
+            \$env:APP_NAME = "b\${lc_o_acute}t"
             & php -f "\${filepath_phar}" -- @args
 
             PS1;
@@ -49,10 +50,13 @@ $mk_exe_PS1s = function() {
                 $mk_ps1($filename_phar);
         }
     };
-    $is_scripts_folder = fn(string $folderpath) : bool => pathinfo($folderpath)['filename'] === 'scripts';
+    $is_unembbeded_folder = function(string $folderpath) : bool {
+        $foldername = pathinfo($folderpath)['filename'];
+        return $foldername  === 'scripts' || $foldername  === 'assets';
+    };
     $mk_bót_browser_ps1();
     foreach(glob(Functions::folderpathBins() . '/*') as $folderpath) {
-        if ($is_scripts_folder($folderpath))
+        if ($is_unembbeded_folder($folderpath))
             continue;
         $mk_exe_ps1($folderpath);
     }
@@ -92,7 +96,7 @@ $mk_bót_json = function(string $filepath_zip) use ($version, $filename_zip) {
     f::array2json($filepath_json, $json);
 };
 Functions::delete(__DIR__, ['zip']);
-Functions::copyFromBinsTo($_GET['folderpath_zip'], ['scripts']);
+Functions::copyFromBinsTo($_GET['folderpath_zip'], ['scripts', 'assets']);
 $delete_zip_file();
 $mk_exe_PS1s();
 $copy_from_local();
