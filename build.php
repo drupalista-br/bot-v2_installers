@@ -21,9 +21,11 @@ $mk_nix_file = function() use ($version) {
 
         installPhase = ''
             mkdir -p \$out/bin
-            mkdir -p \$out/bot-js
+            mkdir -p \$out/scripts
+            mkdir -p \$out/assets
             cp \$src/bin/* \$out/bin/
-            cp \$src/js/* \$out/bot-js/
+            cp \$src/scripts/* \$out/scripts/
+            cp \$src/assets/* \$out/assets/
             chmod +x \$out/bin/*
         '';
     }
@@ -32,7 +34,7 @@ $mk_nix_file = function() use ($version) {
     file_put_contents($filepath, $content);
 };
 $folderpath_installer = __DIR__;
-$folders = ['bin', 'scripts'];
+$folders = ['bin', 'scripts', 'assets'];
 Functions::delete($folderpath_installer, $folders);
 Functions::copyFromBinsTo($folderpath_installer, $folders);
 $mk_nix_file();
