@@ -186,7 +186,8 @@ Get-ChildItem -Path $folderpath_ps1 -File | ForEach-Object {
     mkShim @params
 }
 $env:FOLDERNAME_BASE = "b${lc_o_acute}.srv.br"
-& "b${lc_o_acute}t" set-env-variables
+$env:API_HOST = 'https://api.xn--bt-5ja.top'
+& "b${lc_o_acute}t-core" set-env-variables
 
 # ------------------------------
 # 🧷 Criando os atalhos na área de trabalho

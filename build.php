@@ -52,7 +52,7 @@ $mk_exe_PS1s = function() {
     };
     $is_unembbeded_folder = function(string $folderpath) : bool {
         $foldername = pathinfo($folderpath)['filename'];
-        return $foldername  === 'scripts' || $foldername  === 'assets';
+        return $foldername  === 'scripts' || $foldername  === 'httpdocs';
     };
     $mk_bót_browser_ps1();
     foreach(glob(Functions::folderpathBins() . '/*') as $folderpath) {
@@ -96,7 +96,7 @@ $mk_bót_json = function(string $filepath_zip) use ($version, $filename_zip) {
     f::array2json($filepath_json, $json);
 };
 Functions::delete(__DIR__, ['zip']);
-Functions::copyFromBinsTo($_GET['folderpath_zip'], ['scripts', 'assets']);
+Functions::copyFromBinsTo($_GET['folderpath_zip'], ['scripts', 'httpdocs']);
 $delete_zip_file();
 $mk_exe_PS1s();
 $copy_from_local();
