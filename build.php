@@ -88,6 +88,7 @@ $mk_bót_json = function(string $filepath_zip) use ($version, $filename_zip) {
             'uutils-coreutils',
             'fastfetch',
             'fd',
+            'grep',
         ],
         'pre_uninstall' => [
             '& "$dir\\desinstalar.ps1"',
